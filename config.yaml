@@ -1,0 +1,269 @@
+# 该配置由本人查看文档、参考他人配置以及个人需求编辑，难免有不合理之处，如果你对该配置有什么建议或意见还请指出，我会及时修改，争取做一个适合大部分人使用的懒人配置
+# Telegram channel @ksc666
+# 大部分配置 参考 @CHIZI-0618 的 box4magisk
+# 该配置你只需要修改 proxy-providers 订阅部分即可直接跑起来
+# 该配置已在 Android（Magisk）、Windows 平台测试通过
+# 如需转载请注明出处
+# 大部分配置向加了注释，你可以根据自己需求修改
+
+# http-port: 7890 # HTTP(S) 代理端口
+# socks-port: 7892 # SOCKS5 代理端口
+mixed-port: 1080 # HTTP(S) 和 SOCKS 代理混合端口
+redir-port: 7891 # redirect 透明代理端口，仅能代理 TCP 流量，仅适用于 Linux 以及 macOS 使用
+tproxy-port: 1536 # tproxy 透明代理端口，可以代理 TCP 以及 UDP 流量，仅限 linux 适用 (Android 设备属于 Linux 设备）
+
+mode: rule # 运行模式：rule 规则匹配；global 全局代理(需要在GLOBAL策略组选择代理/策略)；direct 全局直连
+find-process-mode: strict # 进程匹配模式：always 开启，强制匹配所有进程；；strict 默认，由 Clash 判断是否开启；off 不匹配进程，推荐在路由器上使用此模式
+global-client-fingerprint: random # 全局客户端指纹，可选："chrome", "firefox", "safari", "iOS", "android", "edge", "360"," qq", "random"；若选择 "random", 则按 Cloudflare Radar 数据按概率生成一个现代浏览器指纹。
+global-ua: clash.meta # 自定义外部资源下载时使用的UA,默认为 clash.meta
+log-level: error # 日志级别：silent 静默，不输出；error 仅输出发生错误至无法使用的日志；warning 输出发生错误但不影响运行的日志，以及 error 级别内容；info 输出一般运行的内容，以及 error 和 warning 级别的日志；debug 尽可能的输出运行中所有的信息
+allow-lan: true # 允许局域网内其他设备经过 Clash 的代理端口访问互联网，可选值 true/false
+bind-address: "*" # 绑定 IP, 通过 LAN 访问一个/一些特定的 IP 地址，"*" 绑定所有 IP 地址，默认值，不填写此项则绑定全部
+ipv6: true # 是否允许内核接受 IPv6 流量，可选值 true/false
+tcp-concurrent: true # tcp并发，允许同时处理多个tcp连接，可选值 true/false
+keep-alive-interval: 30 # TCP Keep Alive 间隔,单位分钟 | 控制 Clash 发出 TCP Keep Alive 包的间隔,减少移动设备耗电问题的临时措施
+unified-delay: true # 统一延迟，更换延迟计算方式,去除握手等额外延迟 可选值 true/false
+
+# GEO文件配置
+geodata-mode: true # GeoIP 使用的文件,可选 true 为.dat/ false 为.mmdb
+geosite-matcher: succinct # GeoSite 使用的匹配器实现，可选：succinct：与规则集相同；mph：来自 V2Ray，也是 Xray 中的“混合”
+geodata-loader: memconservative # GEO 文件加载模式：standard：标准加载器；memconservative：专为内存受限(小内存)设备优化的加载器(默认值)
+geo-auto-update: true # 自动更新 GEO 文件,可选 true/false
+geo-update-interval: 72 # 更新间隔,单位：小时
+geox-url: # 自定义 GEO 文件下载地址
+  geoip: "https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geoip.dat"
+  geosite: "https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geosite.dat"
+  mmdb: "https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/country.mmdb"
+  asn: "https://github.com/xishang0128/geoip/releases/download/latest/GeoLite2-ASN.mmdb"
+
+# 外部控制 (API)
+external-controller: 127.0.0.1:9090 # 外部控制器，可以使用 RESTful API 来控制你的 Clash 内核；API 监听地址，你可以将 127.0.0.1 修改为 0.0.0.0 来监听所有 IP；访问地址：http://127.0.0.1:9090
+# external-controller-tls: 127.0.0.1:9443 # HTTPS-API 监听地址，需要配置 tls 部分证书和其私钥配置，使用 TLS 也必须填写 external-controller
+secret: "ksc666" # API 的访问密钥
+external-ui: "./ui" # 外部用户界面路径，可以为绝对路径，或者 Clash 工作目录的相对路径
+external-ui-name: "metacubexd" # 自定义外部用户界面名字
+external-ui-url: "https://github.com/MetaCubeX/metacubexd/archive/refs/heads/gh-pages.zip" # 自定义外部用户界面下载地址
+
+profile: # 缓存
+  store-selected: true # 储存 API 对策略组的选择，以供下次启动时使用
+  store-fake-ip: true # 储存 fakeip 映射表，域名再次发生连接时，使用原有映射地址
+
+sniffer: # 域名嗅器,通过读取握手包内的域名字段,将IP还原成域名,有效解决Mapping机制的短板
+  enable: true
+  force-dns-mapping: true # 对 redir-host 类型识别的流量进行强制嗅探
+  parse-pure-ip: true # 对所有未获取到域名的流量进行强制嗅探
+  override-destination: true # 是否使用嗅探结果作为实际访问,默认为 true
+  sniff:
+    HTTP:
+      ports: [80, 8080-8880]
+      override-destination: true # 可覆盖 sniffer.override-destination
+    TLS:
+      ports: [443, 8443]
+    QUIC:
+      ports: [443, 8443]
+  force-domain: # 需要强制嗅探的域名（默认情况下只对IP进行嗅探）
+    - "+.v2ex.com"
+  skip-domain: # 需要跳过嗅探的域名。主要解决部分站点sni字段非域名，导致嗅探结果异常的问题，如米家设备
+    - "Mijia Cloud"
+
+tun:
+  enable: false # 是否启用,可选 true/false
+  stack: mixed # tun 模式堆栈，如无使用问题，建议使用 mixed栈，默认 gvisor，可用值： system/gvisor/mixed
+  auto-route: true # 自动设置全局路由,可以自动将全局流量路由进入 tun 网卡
+  auto-detect-interface: true # 自动选择流量出口接口,多出口网卡同时连接的设备建议手动指定出口网卡
+  dns-hijack: # dns 劫持，将匹配到的连接导入内部 dns 模块，不书写协议则为 udp://
+    - "any:53"
+  device: Meta # 指定 tun 网卡名称,MacOS 设备只能使用 utun 开头的网卡名
+  mtu: 9000 # 最大传输单元，会影响极限状态下的速率，一般用户默认即可。
+  strict-route: false # 严格路由，所有连接路由到 tun 来防止泄漏,但设备将无法被其他设备访问
+  gso: true # 启用通用分段卸载,仅支持 Linux
+  gso-max-size: 65536 # 数据块的最大长度
+  udp-timeout: 300 # UDP NAT 过期时间,以秒为单位,默认为 300(5 分钟)
+  endpoint-independent-nat: false # 启用独立于端点的 NAT,性能可能会略有下降,所以不建议在不需要的时候开启
+  inet4-route-exclude-address: #启用 auto-route 时排除自定义网段
+    - 192.168.0.0/16
+  inet6-route-exclude-address: #启用 auto-route 时排除自定义网段
+    - fc00::/7
+
+dns:
+  enable: true
+  prefer-h3: true #优先使用 DOH 的 http/3
+  listen: 0.0.0.0:1053
+  ipv6: true
+  ipv6-timeout: 300 #ipv6超时，单位 毫秒
+  cache-algorithm: arc #缓存算法
+  use-hosts: true #查询系统Hosts
+  default-nameserver: #默认 DNS, 用于解析 DNS 服务器 的域名，必须为 IP, 可为加密 DNS
+    - 'https://1.12.12.12/dns-query'
+    - 'https://[2400:3200::1]/dns-query'
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.0/16
+  fake-ip-filter: #fakeip 过滤，以下地址不会下发 fakeip 映射用于连接
+    - '*'
+    - '+.lan'
+    - '+.local'
+  nameserver-policy: ##指定域名查询的解析服务器，优先于 nameserver/fallback 查询
+    "geosite:cn,private":
+      - 'https://1.12.12.12/dns-query'
+      - 'https://223.5.5.5/dns-query'
+      - 'https://[2400:3200::1]/dns-query'
+      - 'https://[2402:4e00::]/dns-query'
+  nameserver: #默认的域名解析服务器，如不配置 fallback/proxy-server-nameserver , 则所有域名都由 nameserver 解析
+    - 'https://1.1.1.1/dns-query#🌍DNS解析'
+    - 'https://8.8.8.8/dns-query#🌍DNS解析'
+    - 'https://[2606:4700:4700::1111]/dns-query#🌍DNS解析'
+    - 'https://[2001:4860:4860::8888]/dns-query#🌍DNS解析'
+#    - 'https://94.140.14.14/dns-query#🌍DNS解析'
+#    - 'https://9.9.9.9/dns-query#🌍DNS解析'
+#    - 'https://208.67.222.222/dns-query#🌍DNS解析'
+#    - 'https://[2a10:50c0::ad1:ff]/dns-query#🌍DNS解析'
+#    - 'https://[2620:fe::fe]/dns-query#🌍DNS解析'
+#    - 'https://[2620:119:35::35]/dns-query#🌍DNS解析'
+  proxy-server-nameserver: #代理节点域名解析服务器，仅用于解析代理节点的域名
+    - 'https://1.1.1.1/dns-query#🌍DNS解析'
+    - 'https://8.8.8.8/dns-query#🌍DNS解析'
+
+proxies:
+  
+# 錨点，将需要反复书写的配置设为錨点，在需要的地方引用
+# 订阅类型，更新间隔，健康检查配置
+p: &p 
+  {type: http, interval: 86400, proxy: 🌎代理, health-check: {enable: true, url: https://www.gstatic.com/generate_204, interval: 3600, timeout: 5000, lazy: true}}
+
+# 策略组
+pr: &pr 
+  {type: select, proxies: [DIRECT, REJECT, 🚀手动选择, ♻️自动选择, 🔯负载均衡, 🛠故障转移, 🇭🇰香港, 🇹🇼台湾, 🇯🇵日本, 🇸🇬新加坡, 🇺🇸美国, 🌎其它地区, 💎专线, 🌍全部节点]}
+
+# 节点筛选
+u: &u 
+  type: url-test
+  use:
+    - 🛫 miaona
+    - 🛫 魔戒
+    - 🛫 极速云
+    - 🛫 顶级机场
+    - 🛫 飞鸟云
+    - 🛫 淘气兔
+  exclude-filter: "套餐|流量|群组|频道|官网|推荐使用|测试|电报" #排除满足关键词或正则表达式的节点
+  exclude-type: "http" #排除指定类型的节点，不支持正则表达式，通过 | 分割
+
+proxy-providers:
+# 机场订阅
+# override 覆写节点内容；additional-prefix：为节点名称添加固定前缀；additional-suffix：为节点名称添加固定后缀
+
+  🛫 miaona: {<<: *p, url: "https://miaona.org/#/register?code=C3J67GSL", path: ./机场/可乐云.yaml, override: {additional-prefix: "可乐云 | "}}
+  🛫 魔戒: {<<: *p, url: "https://www.mojie.cyou/#/register?code=YjlCVXjA", path: ./机场/魔戒.yaml, override: {additional-prefix: "魔戒 | "}}
+  🛫 极速云: {<<: *p, url: "https://512.jsy.lol/#/register?code=KmIpamty", path: ./机场/极速云.yaml, override: {additional-prefix: "极速云 | "}}
+  🛫 顶级机场: {<<: *p, url: "https://xn--mes358a9urctx.com/#/register?code=wiPXjyYq", path: ./机场/顶级机场.yaml, override: {additional-prefix: "顶级机场 | "}}
+  🛫 飞鸟云: {<<: *p, url: "https://www.feiniaoyun.xyz/#/register?code=1gZX21aI", path: ./机场/飞鸟云.yaml, override: {additional-prefix: "飞鸟云 | "}}
+  🛫 淘气兔: {<<: *p, url: "https://vip.taoqitu.pro/index.html?register=rNh8X1zf", path: ./机场/淘气兔.yaml, override: {additional-prefix: "淘气兔 | "}}
+
+proxy-groups: #代理组
+
+# 模式选择
+  - {name: 🌍DNS解析, <<: *pr}
+  - {name: 🇨🇳国内直连, <<: *pr}
+  - {name: 🌎代理, <<: *pr}
+  - {name: 🚀手动选择, type: select, proxies: [DIRECT, REJECT, ♻️自动选择, 🔯负载均衡, 🛠故障转移, 🇭🇰香港, 🇹🇼台湾, 🇯🇵日本, 🇸🇬新加坡, 🇺🇸美国, 🌎其它地区, 💎专线, 🌍全部节点]}
+  - {name: ♻️自动选择, <<: *u, type: url-test, url: 'https://www.gstatic.com/generate_204', interval: 300, tolerance: 5, lazy: true}
+  - {name: 🔯负载均衡, <<: *u, type: load-balance, strategy: consistent-hashing, url: 'https://www.gstatic.com/generate_204', interval: 300, lazy: true}
+  - {name: 🛠故障转移, type: fallback, proxies: [🇭🇰香港, 🇹🇼台湾, 🇯🇵日本, 🇸🇬新加坡, 🇺🇸美国, 🌎其它地区, 💎专线, 🌍全部节点], url: 'https://www.gstatic.com/generate_204', interval: 300, lazy: true}
+
+# strategy:负载均衡策略
+# consistent-hashing 将会把相同顶级域名的请求分配给策略组内的同一个代理节点
+# round-robin 将会把所有的请求分配给策略组内不同的代理节点
+
+# 应用分流
+#  - {name: 🛡IP属地, <<: *pr}
+  - {name: 🔔Google FCM, <<: *pr}
+  - {name: 📺YouTube, <<: *pr}
+  - {name: 📲Telegram, <<: *pr}
+  - {name: 📳Github, <<: *pr}
+  - {name: 🤖人工智障, <<: *pr}
+  - {name: Ⓜ️MEGA, <<: *pr}
+  - {name: 🔐Google, <<: *pr}
+  - {name: Ⓜ️Microsoft, <<: *pr}
+  - {name: 🍎Apple, <<: *pr}
+  - {name: 🐦Twitter, <<: *pr}
+  - {name: 🅿️Pixiv, <<: *pr}
+  - {name: 🅿️PikPak, <<: *pr}
+  - {name: 👛Paypal, <<: *pr}
+  - {name: 🎮Steam, <<: *pr}
+  - {name: 📹TikTok, <<: *pr}
+  - {name: 📺Netflix, <<: *pr}
+  - {name: 🎵Spotify, <<: *pr}
+  - {name: ⛔️GFW, <<: *pr}
+  - {name: 🐟漏网之鱼, <<: *pr}
+
+# 地区节点筛选
+  - {name: 🇭🇰香港, <<: *u, filter: "(?i)港|hk|hongkong|hong kong"}
+  - {name: 🇹🇼台湾, <<: *u, filter: "(?i)台|tw|taiwan|tai"}
+  - {name: 🇯🇵日本, <<: *u, filter: "(?i)日本|jp|japan"}
+  - {name: 🇺🇸美国, <<: *u, filter: "(?i)^(?!.*(?:RU)).*(美|us|unitedstates|united states)"}
+  - {name: 🇸🇬新加坡, <<: *u, filter: "(?i)(新|sg|singapore)"}
+  - {name: 🌎其它地区, <<: *u, filter: "(?i)^(?!.*(?:🇭🇰|🇯🇵|🇺🇸|🇸🇬|🇹🇼|港|hk|hongkong|hong kong|台|tw|taiwan|tai|日|jp|japan|新|sg|singapore|美|us|unitedstates)).*"}
+  - {name: 💎专线, <<: *u, filter: "(?i)奈飞|解锁|原生|gpt|Netflix"}
+  - {name: 🌍全部节点, <<: *u}
+
+rule-providers: #外部规则提供者
+  Gemini: {type: http, path: ./rule-providers/Gemini.yaml, url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Gemini/Gemini.yaml", interval: 86400, behavior: classical, format: yaml}
+  Copilot: {type: http, path: ./rule-providers/Copilot.yaml, url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Copilot/Copilot.yaml", interval: 86400, behavior: classical, format: yaml}
+  自定义代理: {type: file, path: ./rule-providers/自定义代理.yaml, behavior: classical, format: yaml}
+  自定义直连: {type: file, path: ./rule-providers/自定义直连.yaml, behavior: classical, format: yaml}
+# IP属地
+#  anti-ip-attribution: {type: http, path: ./rule-providers/Anti-ip-attribution.yaml, url: "https://raw.githubusercontent.com/lwd-temp/anti-ip-attribution/main/generated/rule-provider.yaml", interval: 86400, behavior: classical, format: yaml}
+
+rules:
+# 路由规则
+# 规则将按照从上到下的顺序匹配，列表顶部的规则优先级高于其底下的规则
+# 如请求为 udp，而代理节点没有 udp 支持 (例如ss节点没写udp: true),则会继续向下匹配
+# 域名开始匹配关于 目标IP 规则时，mihomo 将触发 dns 解析来检查域名的 目标IP 是否匹配规则，可以选择 no-resolve 选项以跳过 dns 解析；如在更早的匹配中触发了 dns 解析，则依旧会匹配到添加了 no-resolve 选项的 目标IP 类规则
+
+# IP属地
+#  - RULE-SET,anti-ip-attribution,🛡IP属地
+
+# 直连
+  - RULE-SET,自定义直连,🇨🇳国内直连
+  - GEOSITE,tencent,🇨🇳国内直连
+  - GEOSITE,alibaba,🇨🇳国内直连
+  - GEOSITE,bytedance,🇨🇳国内直连
+  - GEOSITE,xiaomi,🇨🇳国内直连
+  - GEOSITE,bilibili,🇨🇳国内直连
+  - GEOSITE,category-netdisk-cn,🇨🇳国内直连
+
+# 代理
+  - GEOSITE,telegram,📲Telegram
+  - GEOSITE,github,📳Github
+  - GEOSITE,googlefcm,🔔Google FCM
+  - GEOSITE,youtube,📺YouTube
+  - RULE-SET,Gemini,🤖人工智障
+  - GEOSITE,google,🔐Google
+  - GEOSITE,mega,Ⓜ️MEGA
+  - RULE-SET,自定义代理,🌎代理
+  - GEOSITE,openai,🤖人工智障
+  - RULE-SET,Copilot,🤖人工智障
+  - GEOSITE,microsoft,Ⓜ️Microsoft
+  - GEOSITE,apple,🍎Apple
+  - GEOSITE,twitter,🐦Twitter
+  - GEOSITE,pixiv,🅿️Pixiv
+  - GEOSITE,pikpak,🅿️PikPak
+  - GEOSITE,steam,🎮Steam
+  - GEOSITE,tiktok,📹TikTok
+  - GEOSITE,paypal,👛Paypal
+  - GEOSITE,netflix,📺Netflix
+  - GEOSITE,Spotify,🎵Spotify
+  - GEOSITE,GFW,⛔️GFW
+  - GEOSITE,CN,🇨🇳国内直连
+  - GEOSITE,geolocation-!cn,🌎代理
+  - GEOSITE,private,DIRECT,no-resolve
+
+# GEOIP
+  - GEOIP,telegram,📲Telegram
+  - GEOIP,google,🔐Google
+  - GEOIP,twitter,🐦Twitter
+  - GEOIP,netflix,📺Netflix
+  - GEOIP,CN,🇨🇳国内直连
+  - GEOIP,private,DIRECT,no-resolve
+
+# 兜底规则
+  - MATCH,🐟漏网之鱼
