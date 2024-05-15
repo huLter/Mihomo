@@ -73,6 +73,7 @@ tun:
   auto-detect-interface: true # 自动选择流量出口接口,多出口网卡同时连接的设备建议手动指定出口网卡
   dns-hijack: # dns 劫持，将匹配到的连接导入内部 dns 模块，不书写协议则为 udp://
     - "any:53"
+    
   device: Meta # 指定 tun 网卡名称,MacOS 设备只能使用 utun 开头的网卡名
   mtu: 9000 # 最大传输单元，会影响极限状态下的速率，一般用户默认即可。
   strict-route: false # 严格路由，所有连接路由到 tun 来防止泄漏,但设备将无法被其他设备访问
